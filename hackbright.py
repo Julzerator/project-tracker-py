@@ -74,6 +74,19 @@ def get_student_grade(github_username, project_title):
         first_name, last_name, project_title, grade)
     # This is indexing (grade[0], grade[1], grade[2], grade[3])
 
+def give_student_grade(student_github, project_title, grade):
+    """Given github username, project title and grade of student, add it to the student's record"""
+
+    QUERY = """
+        INSERT INTO Grades (student_github, project_title, grade)
+        VALUES (?, ?, ?)
+        """
+    db_cursor.execute(QUERY,(student_github, project_title, grade))
+
+    db_connection.commit()
+    print "The grade of %s has been recorded for %s for the %s project." % (
+        grade, student_github, project_title)
+
 def handle_input():
     """Main loop.
 
@@ -103,6 +116,10 @@ def handle_input():
         elif command == "student_grade":
             github_username, project_title = args
             get_student_grade(github_username, project_title)
+
+        elif command == "give_student_grade":
+            student_github, project_title, grade = args
+            give_student_grade(student_github, project_title, grade)
 
 if __name__ == "__main__":
     handle_input()
