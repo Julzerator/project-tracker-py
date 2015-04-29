@@ -24,6 +24,56 @@ def get_student_by_github(github):
         row[0], row[1], row[2])
 
 
+def make_new_student(first_name, last_name, github):
+    """Add a new student and print confirmation.
+
+    Given a first name, last name, and GitHub account, add student to the
+    database and print a confirmation message.
+    """
+
+    QUERY = """
+        INSERT INTO Students (first_name, last_name, github)
+        VALUES (?, ?, ?)
+        """
+    db_cursor.execute(QUERY, (first_name, last_name, github))
+
+    db_connection.commit()
+    print "Successfully added student: %s %s" % (first_name, last_name)
+
+
+def get_project_by_title(title):
+    """Given a project title, print information about the matching project."""
+
+    QUERY = """
+        SELECT title, description, max_grade
+        FROM Projects
+        WHERE title = ?
+        """
+    db_cursor.execute(QUERY, (title,))
+    project = db_cursor.fetchall()
+    print "These Projects were found:"
+    for i in project:
+        print "Project Title: %s\nProject Description: %s\nMaximum Grade: %d" % (
+            i[0], i[1], i[2])
+
+def get_student_grade(github_username, project_title):
+    """Given github username and project title, print student grade"""
+
+    QUERY = """
+        SELECT first_name, last_name, project_title, grade 
+        FROM Grades
+        LEFT JOIN Students
+        ON github = student_github
+        WHERE student_github = ?
+        AND project_title = ?
+        """
+    db_cursor.execute(QUERY, (github_username, project_title))
+    grade = db_cursor.fetchone()
+    first_name, last_name, project_title, grade = grade  # This is unpacking
+    print "Student's name: %s %s\nProject title: %s\nGrade: %d" % (
+        first_name, last_name, project_title, grade)
+    # This is indexing (grade[0], grade[1], grade[2], grade[3])
+
 def handle_input():
     """Main loop.
 
@@ -46,6 +96,13 @@ def handle_input():
             first_name, last_name, github = args   # unpack!
             make_new_student(first_name, last_name, github)
 
+        elif command == "project_title":
+            title = args[0]
+            get_project_by_title(title)
+
+        elif command == "student_grade":
+            github_username, project_title = args
+            get_student_grade(github_username, project_title)
 
 if __name__ == "__main__":
     handle_input()
